@@ -90,7 +90,7 @@ testdata = data[!train,]
 ### Multiple Linear Regression
 
 <<<<<<< HEAD
-Our first method will beeeee test test
+Our first method will beeeee test test test
 =======
 Our first method will be
 >>>>>>> 7d3f82cf8954ce02ecfe6abd9949459b6fd59e4b
