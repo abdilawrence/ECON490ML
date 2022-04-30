@@ -6,8 +6,8 @@ header-includes:
     - \usepackage{setspace}\doublespacing
     - \usepackage{float}
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ## Introduction
@@ -90,3 +90,47 @@ testdata = data[!train,]
 ### Multiple Linear Regression
 
 Our first method will be
+
+### Ridge Regression
+
+```{r}
+library(glmnet)
+train.test = model.matrix(yield~., data = traindata)
+x.test = model.matrix(yield~., data = testdata)
+
+     
+# Finding lambda chosen by cross-validation
+set.seed(42)
+ridge.cv = cv.glmnet(train.test, traindata$yield, alpha = 0)
+lambda.ridge = ridge.cv$lambda.min
+lambda.ridge
+plot(ridge.cv)
+
+#Fitting to ridge regression
+ridge.fit = glmnet(train.test, traindata$yield, alpha = 0, lambda = lambda.ridge)
+coef(ridge.fit)
+
+#Mean square error
+ridge.pred = predict(ridge.fit, newx=x.test, s = lambda.ridge)
+mean((testdata$yield - ridge.pred)^2)
+```
+### Lasso Regression
+
+```{r}
+# Finding lambda chosen by cross-validation
+set.seed(42)
+lasso.cv = cv.glmnet(train.test, traindata$yield, alpha = 1)
+lambda.lasso = lasso.cv$lambda.min
+lambda.lasso
+plot(lasso.cv)
+
+#Fitting to lasso regression
+lasso.fit = glmnet(train.test, traindata$yield, alpha = 1, lambda = lambda.lasso)
+coef(lasso.fit)
+
+#Mean square error
+lasso.pred = predict(lasso.fit, newx=x.test, s = lambda.lasso)
+mean((testdata$yield - lasso.pred)^2)
+```
+
+There are 11 non-zero coefficient estimates in the lasso regression
