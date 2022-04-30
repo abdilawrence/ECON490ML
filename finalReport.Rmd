@@ -6,8 +6,8 @@ header-includes:
     - \usepackage{setspace}\doublespacing
     - \usepackage{float}
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 ## Introduction
@@ -73,7 +73,7 @@ We will attempt to predict `yield` with the given predictor variables in the dat
 Before beginning any machine learning algorithms, we decided to only retain `AverageOfLowerTRange` and `AverageOfUpperTRange` amongst out six temperature variables. The researchers used historical weather data to simulate the ranges of temperatures. Because of this we are comfortable using these two variables as our high and low temperatures. Our decision to remove these variables will simplify the model, and minimize multicolinearity. This will result in 9 predictor variables for our modeling.
 
 ```{r, eval = TRUE, message=FALSE, warning=FALSE}
-data = select(data, -c(MaxOfUpperTRange, MinOfUpperTRange, MaxOfLowerTRange, MinOfLowerTRange))
+data = select(data, -c(MaxOfUpperTRange, MinOfUpperTRange, MaxOfLowerTRange, MinOfLowerTRange, fruitset, fruitmass, seeds))
 dim(data)
 ```
 
@@ -83,17 +83,31 @@ We will also create training and test sets from our data before starting our mod
 set.seed(42)
 train = sample(c(TRUE, FALSE), size = nrow(data), prob = c(0.7, 0.3), replace = TRUE)
 traindata = data[train, ]
-testdata = data[!train,]
+testdata = data[!train, ]
 ```
 
 
 ### Multiple Linear Regression
 
-Our first method will be
+Our first method will be to model the data using Multiple Linear Regression, with all 9 predictor variables. The result of the regression is the formula
+$$ yield = 79.28.955 \ - \ 98.207clonesize \ +\ 118.492honeybee \ +\ 5980.501bumbles \ +\ 520.207adrena \ +\ 2448.218osmia$$ 
+$$+\ 236.815AverageOfUpperTRange \ -\ 369.804AverageOfLowerTRange \ +\ 51.718RainingDays $$
+$$-\ 8375.642AverageRainingDays$$
+Surprisingly, `AverageOfUpperTRange` and `AverageOfLowerTRange` are not statistically significant in this model. Perhaps temperature does not have much an effect yield. It's too early to know for sure, but more evidence may be presented as we continue. The RMSE produced a value of $590.3259$. Another insight this model has provided is that bumblebees may have the largest impact on blueberry yield of the four species. Lastly, it was not expected that the coefficient of `clonesize` would be negative. We assumed that larger bushes produce more berries on average.
+
+```{r, eval = TRUE, message=FALSE, warning=FALSE}
+set.seed(42)
+MLR = lm(yield ~ ., data = traindata)
+summary(MLR)
+
+MLRtest = predict(MLR, newdata = testdata)
+sqrt(mean((MLRtest - testdata$yield) ^ 2))
+
+```
 
 ### Ridge Regression
 
-```{r}
+```{r, eval = TRUE, message=FALSE, warning=FALSE}
 library(glmnet)
 train.test = model.matrix(yield~., data = traindata)
 x.test = model.matrix(yield~., data = testdata)
@@ -116,7 +130,7 @@ mean((testdata$yield - ridge.pred)^2)
 ```
 ### Lasso Regression
 
-```{r}
+```{r, eval = TRUE, message=FALSE, warning=FALSE}
 # Finding lambda chosen by cross-validation
 set.seed(42)
 lasso.cv = cv.glmnet(train.test, traindata$yield, alpha = 1)
