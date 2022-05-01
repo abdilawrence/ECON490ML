@@ -6,8 +6,8 @@ header-includes:
     - \usepackage{setspace}\doublespacing
     - \usepackage{float}
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ## Introduction
@@ -102,7 +102,7 @@ summary(MLR)
 
 MLRtest = predict(MLR, newdata = testdata)
 sqrt(mean((MLRtest - testdata$yield) ^ 2))
-
+  
 ```
 
 ### Ridge Regression
@@ -148,3 +148,51 @@ mean((testdata$yield - lasso.pred)^2)
 ```
 
 There are 11 non-zero coefficient estimates in the lasso regression
+
+### Regression Tree
+```{r, eval = TRUE, message=FALSE, warning=FALSE}
+## creating regression tree with training data
+library(tree)
+set.seed(42)
+tree.train =  tree(yield ~ ., data = traindata)
+plot(tree.train)
+text(tree.train, pretty = 0)
+
+##test MSE prior to CV + pruning
+predict.yield1 = predict(tree.train, newdata = testdata)
+mean((predict.yield1 - testdata$yield)^2)
+
+## apply K-fold cross validation, K = 10 is standard size to use
+## graph reveals that the training RSS is at its minimum at 14 nodes
+cv.train = cv.tree(tree.train, K = 10)
+plot(cv.train$size, cv.train$dev, xlab = "Nodes", ylab = "CV RSS", type = "b")
+
+## prune tree
+tree.prune = prune.tree(tree.train, best = 14)
+
+##conclude pruning does not affect MSE
+predict.yield2 = predict(tree.prune, newdata = testdata)
+mean((predict.yield2 - testdata$yield)^2)
+```
+
+### Bagging
+```{r, eval = TRUE, message=FALSE, warning=FALSE}
+##Bagging tries to reduce variance which will in turn reduce MSE
+library(randomForest)
+set.seed(42)
+tree.bag = randomForest(yield ~ ., data = traindata, mtry = 9, importance = T)
+##Significantly smaller MSE relative to what we have done so far
+predict.yield3 = predict(tree.bag, newdata = testdata)
+mean((predict.yield3 - testdata$yield)^2)
+```
+
+### Random Forests
+```{r, eval = TRUE, message=FALSE, warning=FALSE}
+##Random Forests to see if it'll produce a even smaller MSE
+set.seed(42)
+tree.rf = randomForest(yield ~ ., data = traindata, mtry = 3, importance = T)
+predict.yield4 = predict(tree.rf, newdata = testdata)
+mean((predict.yield4 - testdata$yield)^2)
+
+##MSE produced by Random Forests is smallest out of all tree methods used
+```
