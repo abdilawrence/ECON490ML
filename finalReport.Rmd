@@ -271,7 +271,7 @@ $$ yield = 7928.955 \ - \ 98.207clonesize \ +\ 118.492honeybee \ +\ 5980.501bumb
 $$+\ 236.815AverageOfUpperTRange \ -\ 369.804AverageOfLowerTRange \ +\ 51.718RainingDays $$
 $$-\ 8375.642AverageRainingDays$$
 
-We discovered that bumblebees have a substantial impact on blueberry yield. According to our MLR model, for each additional bumblebee per $m^2$ per second, blueberry yield is expected to increase by approximately $5980.5$. According to our Random Forest model, bumbleebee density has the greatest impact on blueberry yield.
+We discovered that bumblebees have a substantial impact on blueberry yield. According to our MLR model, for each additional bumblebee per $m^2$ per second, blueberry yield is expected to increase by approximately $5980.5$. According to our Random Forest model, bumblebee density has the greatest impact on blueberry yield.
 
 On the other hand, honeybees do not have much of an impact on blueberry yield. According to our Random Forest models, they are either the least or second least important variable in affecting blueberry yield. This is also the case in our MLR model, in which `bumblebee` only has a coefficient of $118.492$, which is the smallest of any bee species.
 
